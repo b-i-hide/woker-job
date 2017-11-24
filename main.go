@@ -9,9 +9,10 @@ import (
 func main() {
 
 	for i := 0; i < 1000; i++ {
-		doSomething()
+		go doSomething()
 	}
 
+	time.Sleep(5 * time.Second)
 	log.Println("end main")
 }
 
@@ -21,6 +22,6 @@ var counter int32 = 0
 func doSomething() {
 	counter := atomic.AddInt32(&counter, 1)
 	log.Printf("start doSomething: %d\n", counter)
-	time.Sleep(5 * time.Second)
+	time.Sleep(4 * time.Second)
 	log.Printf("end doSomething: %d\n", counter)
 }
