@@ -12,10 +12,14 @@ var wg *sync.WaitGroup
 func main() {
 	wg = new(sync.WaitGroup)
 
-	for i := 0; i < 1000; i++ {
+	ch := make(chan int, 10)
+
+	for i := 0; i < 100; i++ {
 		wg.Add(1)
+		ch <- i
 		go doSomething(wg)
 	}
+	close(ch)
 	wg.Wait()
 	log.Println("end main")
 }
