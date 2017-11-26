@@ -7,30 +7,49 @@ import (
 	"time"
 )
 
+type Dispatcher struct {
+	queue chan int32
+	wg    sync.WaitGroup
+}
+
 var wg *sync.WaitGroup
 var counter int32 = 0
 
-func main() {
-	wg = new(sync.WaitGroup)
+const (
+	maxWorkers = 3
+	maxQueues  = 100
+)
 
-	ch := make(chan int32, 10)
+func main() {
+	d := NewDispatcher()
+
+	for v := 0; v < maxWorkers; v++ {
+		go doSomething(wg, d)
+	}
 
 	for i := 0; i < 1000; i++ {
-		wg.Add(1)
+		d.wg.Add(maxWorkers)
 		counter = atomic.AddInt32(&counter, 1)
-		ch <- counter
-		go doSomething(wg, ch)
+		d.queue <- counter
+
 	}
-	close(ch)
-	wg.Wait()
+	close(d.queue)
+	d.wg.Wait()
 	log.Println("end main")
 }
 
 // 時間がかかるダミー処理
-func doSomething(wg *sync.WaitGroup, ch chan int32) {
-	counter := <-ch
+func doSomething(wg *sync.WaitGroup, d *Dispatcher) {
+	counter := <-d.queue
 	log.Printf("start doSomething: %d\n", counter)
 	time.Sleep(5 * time.Second)
 	log.Printf("end doSomething: %d\n", counter)
-	wg.Done()
+	d.wg.Done()
+}
+
+func NewDispatcher() *Dispatcher {
+	d := &Dispatcher{
+		queue: make(chan int32, maxQueues),
+	}
+	return d
 }
