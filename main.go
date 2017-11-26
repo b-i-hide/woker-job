@@ -7,16 +7,14 @@ import (
 	"time"
 )
 
-var wg *sync.WaitGroup
-
 func main() {
-	wg = new(sync.WaitGroup)
+	wg := new(sync.WaitGroup)
+	defer wg.Wait()
 
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
 		go doSomething(wg)
 	}
-	wg.Wait()
 	log.Println("end main")
 }
 
