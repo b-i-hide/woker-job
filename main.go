@@ -11,7 +11,7 @@ var wg *sync.WaitGroup
 var counter int32 = 0
 
 func main() {
-	wg = new(sync.WaitGroup)
+	wg := new(sync.WaitGroup)
 
 	ch := make(chan int32, 10)
 
@@ -29,8 +29,8 @@ func main() {
 // 時間がかかるダミー処理
 func doSomething(wg *sync.WaitGroup, ch chan int32) {
 	counter := <-ch
+	defer wg.Done()
 	log.Printf("start doSomething: %d\n", counter)
 	time.Sleep(5 * time.Second)
 	log.Printf("end doSomething: %d\n", counter)
-	wg.Done()
 }
