@@ -1,4 +1,4 @@
-###課題
+### 課題
 - 課題1: doSomethingを非同期化してみる
 - 課題2: doSomethingが実行し終わるのを待ってみる（ヒント: sync.WaitGroup）
 - 課題3: doSomethingの並列数を管理してみる（ヒント: channelのcapacity飽和でlockされる仕組みを使うといいかと）
