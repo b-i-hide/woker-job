@@ -18,17 +18,17 @@ const (
 func main() {
 	wg := new(sync.WaitGroup)
 	ch := make(chan int, maxCap)
+	defer close(ch)
 
 	for i := 0; i < maxCap; i++ {
 		go func() {
-			for _ = range ch {
-				doSomething(wg, ch)
+			for range ch {
+				doSomething(wg)
 			}
 		}()
 	}
 
 	for i := 0; i < 1000; i++ {
-		// WGをインクリメント
 		wg.Add(1)
 		ch <- i
 	}
@@ -38,8 +38,7 @@ func main() {
 }
 
 // 時間がかかるダミー処理
-func doSomething(wg *sync.WaitGroup, ch chan int) {
-	// WGをデクリメント
+func doSomething(wg *sync.WaitGroup) {
 	defer wg.Done()
 	counter := atomic.AddInt32(&counter, 1)
 	log.Printf("start doSomething: %d\n", counter)
