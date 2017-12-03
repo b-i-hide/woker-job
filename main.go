@@ -12,7 +12,7 @@ var wg *sync.WaitGroup
 var counter int32 = 0
 
 const (
-	maxCap = 5
+	maxCap = 20
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 		}()
 	}
 
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 1000; i++ {
 		// WGをインクリメント
 		wg.Add(1)
 		ch <- i
