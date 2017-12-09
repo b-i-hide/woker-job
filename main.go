@@ -23,12 +23,13 @@ func main() {
 	for i := 0; i < maxCap; i++ {
 		go func() {
 			for range ch {
-				doSomething(wg)
+				doSomething()
+				wg.Done()
 			}
 		}()
 	}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		ch <- i
 	}
@@ -38,8 +39,7 @@ func main() {
 }
 
 // 時間がかかるダミー処理
-func doSomething(wg *sync.WaitGroup) {
-	defer wg.Done()
+func doSomething() {
 	counter := atomic.AddInt32(&counter, 1)
 	log.Printf("start doSomething: %d\n", counter)
 	time.Sleep(1 * time.Second)
