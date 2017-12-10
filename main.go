@@ -22,10 +22,7 @@ const (
 func main() {
 	d := NewDispatcher()
 	d.Start()
-
-	for i := 0; i < 1000; i++ {
-		d.queue <- i
-	}
+	d.SendJob()
 
 	close(d.queue)
 	d.wg.Wait()
@@ -48,6 +45,12 @@ func (d *Dispatcher) Start() {
 				doSomething()
 			}
 		}()
+	}
+}
+
+func (d *Dispatcher) SendJob() {
+	for i := 0; i < 1000; i++ {
+		d.queue <- i
 	}
 }
 
