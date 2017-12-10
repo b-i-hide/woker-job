@@ -8,19 +8,19 @@ import (
 )
 
 var wg *sync.WaitGroup
-
 var counter int32 = 0
 
 const (
-	maxCap = 20
+	maxJob       = 20
+	maxGoRoutine = 5
 )
 
 func main() {
 	wg := new(sync.WaitGroup)
-	ch := make(chan int, maxCap)
+	ch := make(chan int, maxJob)
 	defer close(ch)
 
-	for i := 0; i < maxCap; i++ {
+	for i := 0; i < maxGoRoutine; i++ {
 		go func() {
 			for range ch {
 				doSomething()
@@ -29,7 +29,7 @@ func main() {
 		}()
 	}
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 200; i++ {
 		wg.Add(1)
 		ch <- i
 	}
