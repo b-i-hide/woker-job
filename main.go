@@ -7,35 +7,51 @@ import (
 	"time"
 )
 
-var wg *sync.WaitGroup
 var counter int32 = 0
 
+type Dispatcher struct {
+	queue chan int
+	wg    sync.WaitGroup
+}
+
 const (
-	maxJob       = 20
-	maxGoRoutine = 5
+	maxWorkers = 20
+	maxQueues  = 100
 )
 
 func main() {
-	wg := new(sync.WaitGroup)
-	ch := make(chan int, maxJob)
-	defer close(ch)
+	d := NewDispatcher()
+	d.Start()
+	d.SendJob()
 
-	for i := 0; i < maxGoRoutine; i++ {
+	close(d.queue)
+	d.wg.Wait()
+	log.Println("end main")
+}
+
+func NewDispatcher() *Dispatcher {
+	d := &Dispatcher{
+		queue: make(chan int, maxQueues),
+	}
+	return d
+}
+
+func (d *Dispatcher) Start() {
+	d.wg.Add(maxWorkers)
+	for i := 0; i < maxWorkers; i++ {
 		go func() {
-			for range ch {
+			defer d.wg.Done()
+			for range d.queue {
 				doSomething()
-				wg.Done()
 			}
 		}()
 	}
+}
 
-	for i := 0; i < 200; i++ {
-		wg.Add(1)
-		ch <- i
+func (d *Dispatcher) SendJob() {
+	for i := 0; i < 1000; i++ {
+		d.queue <- i
 	}
-
-	wg.Wait()
-	log.Println("end main")
 }
 
 // 時間がかかるダミー処理
