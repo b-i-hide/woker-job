@@ -58,6 +58,6 @@ func (d *Dispatcher) SendJob() {
 func doSomething() {
 	counter := atomic.AddInt32(&counter, 1)
 	log.Printf("start doSomething: %d\n", counter)
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
 	log.Printf("end doSomething: %d\n", counter)
 }
