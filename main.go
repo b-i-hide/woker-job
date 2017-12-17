@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"log"
+	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -20,8 +22,10 @@ const (
 )
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 	d := NewDispatcher()
-	d.Start()
+	d.Start(ctx)
 	d.SendJob()
 
 	close(d.queue)
@@ -36,13 +40,13 @@ func NewDispatcher() *Dispatcher {
 	return d
 }
 
-func (d *Dispatcher) Start() {
+func (d *Dispatcher) Start(ctx context.Context) {
 	d.wg.Add(maxWorkers)
 	for i := 0; i < maxWorkers; i++ {
 		go func() {
 			defer d.wg.Done()
 			for range d.queue {
-				doSomething()
+				doSomething(ctx)
 			}
 		}()
 	}
@@ -55,9 +59,16 @@ func (d *Dispatcher) SendJob() {
 }
 
 // 時間がかかるダミー処理
-func doSomething() {
+func doSomething(ctx context.Context) {
 	counter := atomic.AddInt32(&counter, 1)
 	log.Printf("start doSomething: %d\n", counter)
-	time.Sleep(1 * time.Second)
+	time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
 	log.Printf("end doSomething: %d\n", counter)
+	select {
+	case <-ctx.Done():
+		log.Printf("cancel work func: %d", counter)
+		return
+	default:
+		return
+	}
 }
